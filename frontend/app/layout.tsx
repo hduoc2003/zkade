@@ -1,0 +1,45 @@
+import type { Metadata } from "next";
+import "./globals.css";
+import "react-toastify/dist/ReactToastify.css";
+import { IBM_Plex_Mono, Share_Tech_Mono } from "next/font/google";
+import RetroHeader from "@/components/layout/RetroHeader";
+import StellarProvider from "@/components/provider/StellarProvider";
+import { ToastContainer } from "react-toastify";
+
+// Wallet/contract code touches browser-only APIs; skip static prerendering.
+export const dynamic = 'force-dynamic';
+
+const monoFont = IBM_Plex_Mono({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-mono',
+});
+
+const dataFont = Share_Tech_Mono({
+  subsets: ['latin'],
+  weight: '400',
+  variable: '--font-data',
+});
+
+export const metadata: Metadata = {
+  title: "ZKADE",
+  description: "ZK battle arcade on Stellar",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en" suppressHydrationWarning className={`${monoFont.variable} ${dataFont.variable}`}>
+      <body className="text-text px-4 md:px-10 xl:px-24 font-mono" suppressHydrationWarning>
+        <StellarProvider>
+          <RetroHeader />
+          {children}
+          <ToastContainer position="bottom-right" theme="dark" />
+        </StellarProvider>
+      </body>
+    </html>
+  );
+}

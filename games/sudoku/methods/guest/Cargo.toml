@@ -1,0 +1,13 @@
+[package]
+name = "sudoku-guest"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "sudoku"
+path = "src/main.rs"
+
+[workspace]
+
+[dependencies]
+risc0-zkvm = { version = "3.0", default-features = false, features = ["std"] }

@@ -1,0 +1,22 @@
+[package]
+name = "server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.95"
+async-trait = "0.1.85"
+risc0-zkvm = { version = "3.0", default-features = false, features = ["std", "client"] }
+risc0-ethereum-contracts = "3.0"
+sudoku-methods = { path = "../games/sudoku/methods" }
+tokio = { version = "1.39.2", features = ["rt", "rt-multi-thread", "macros", "process"] }
+dotenv = "0.15.0"
+serde_json = "1.0.135"
+axum = "0.8.1"
+serde = { version = "1.0.217", features = ["derive"] }
+thiserror = "1.0.69"
+hex = "0.4.3"
+tower-http = { version = "0.6.2", features = ["cors", "trace"]}
+sudoku = "0.8"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }

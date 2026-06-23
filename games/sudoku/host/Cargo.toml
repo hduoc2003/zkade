@@ -1,0 +1,12 @@
+[package]
+name = "sudoku-host"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+sudoku-methods = { workspace = true }
+risc0-zkvm = { workspace = true, default-features = false, features = ["std", "client"] }
+risc0-ethereum-contracts = "3.0"
+serde = { workspace = true }
+hex = { workspace = true }
+anyhow = { workspace = true }
