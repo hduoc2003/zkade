@@ -2,7 +2,7 @@
 
 > Prove you won. Without revealing how.
 
-ZKADE is a zero-knowledge proof gaming arcade on **Stellar**. Players compete in games with verifiable solutions, deposit funds into a Soroban smart contract, and the winner submits a ZK proof that is **verified on-chain**. The proof convinces the contract that the player knows a correct solution — **without ever revealing the solution itself** — and unlocks the entire prize pool, trustlessly.
+ZKADE is a zero-knowledge gaming arcade on **Stellar**. Players stake into a shared prize pool, race to solve a game, and the winner claims the entire pot — **with no trusted server, and no way for anyone to copy their answer.**
 
 Built for the [Stellar Hacks: Real-World ZK](https://dorahacks.io/hackathon/stellar-hacks-zk) hackathon.
 
@@ -10,13 +10,11 @@ Built for the [Stellar Hacks: Real-World ZK](https://dorahacks.io/hackathon/stel
 
 ## What it does
 
-The core insight: a player can **prove they have a correct solution without revealing what that solution is**. This is enforced cryptographically — a RISC Zero Groth16 proof attests only to the *fact* of correctness, not the answer. A Soroban contract verifies the proof on-chain using Stellar's native **BN254** host functions (Protocol 25 "X-Ray"), then releases the pot to the winner.
+**The problem.** On-chain competitive games face a brutal tradeoff. Submit your solution publicly and every opponent watching the mempool can copy it and front-run your claim — your skill is worthless the instant you prove it. The alternative is trusting a centralized server to validate results off-chain — which throws away the entire point of being on-chain: now you trust an operator who can collude, stall, or lie.
+
+**The solution.** The winner generates a **RISC Zero Groth16 proof** — cryptographic evidence that *"I know a valid solution"* without revealing what it is. A **Soroban** contract verifies that proof **on-chain** using Stellar's native **BN254** pairing functions (Protocol 25 "X-Ray"), and releases the pot the moment it checks out. No server to trust. No answer to leak. No judge to bribe.
 
 The architecture is **game-agnostic**: any game whose winning condition can be expressed as a Rust program can be plugged in as a new RISC Zero guest. Sudoku is the first.
-
-### Why ZK?
-
-Opponents can watch every transaction on-chain, yet still cannot copy the winner's answer — the submitted proof reveals nothing about the solution. There is no oracle, no trusted judge, no admin override: correctness is decided by an on-chain pairing check.
 
 ---
 
