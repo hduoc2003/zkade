@@ -44,8 +44,9 @@ export default function SudokuGamePage({ params }: { params: Promise<{ id: strin
     const prizePool = Number((depositPrice * players.length).toFixed(6));
     const gameIsStarted = !!roomInfo?.initial_state;
     const iAmWinner = !!address && address === roomInfo?.winner;
-    // winner (not yet claimed) keeps seeing the game to finish prove + claim flow
-    const gameIsFinished = !!roomInfo?.winner && (roomInfo?.claimed || !iAmWinner);
+    // the winner stays on the game view through prove → claim → success modal;
+    // only the other players drop to the GAME OVER screen.
+    const gameIsFinished = !!roomInfo?.winner && !iAmWinner;
     const maxPlayers = roomInfo?.max_players ?? 0;
     const isFull = maxPlayers > 0 && players.length >= maxPlayers;
     const isOwner = !!address && address === roomInfo?.creator;
@@ -174,6 +175,7 @@ export default function SudokuGamePage({ params }: { params: Promise<{ id: strin
                                     room_id={parseInt(room_id)}
                                     initial_state={roomInfo?.initial_state ?? null}
                                     currentWinner={roomInfo?.winner ?? null}
+                                    alreadyClaimed={roomInfo?.claimed ?? false}
                                     onVerifySuccess={(tx) => setTxHashes(prev => [...prev, { description: "Submit Solution", txHash: tx }])}
                                     onClaimSuccess={(tx) => setTxHashes(prev => [...prev, { description: "Claim Reward", txHash: tx }])}
                                 />

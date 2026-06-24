@@ -34,6 +34,36 @@ Browser ──Stellar Wallets Kit / Freighter──▶ sign Soroban invoke ─�
                                    └─ RISC Zero Groth16 verifier (native BN254) ──▶ ✓ / revert
 ```
 
+### Game lifecycle
+
+```mermaid
+sequenceDiagram
+    participant FE as Frontend
+    participant BE as Backend
+    participant SC as Contract
+    participant ZK as RISC Zero zkVM
+
+    FE->>BE: Player creates new battle
+    BE->>SC: Only owner creates new battle
+    FE->>SC: Players join battle (deposit)
+    FE->>BE: Creator starts the game
+    BE->>SC: Only owner can start the game (publish givens)
+
+    alt Winner is the fastest player to solve the game
+        Note over FE,SC: Public path — reveal the solution
+        FE->>SC: Winner publishes his solution
+    else ZK path — hide the solution
+        FE->>BE: Winner hides his solution
+        BE->>ZK: Solution = private input, initial state = public input
+        Note over ZK: Prove initial state + solution = valid final state
+        ZK-->>FE: Groth16 proof { seal, journal, image_id }
+        FE->>SC: Winner submits proof
+        Note over SC: Verify Groth16 proof (native BN254)
+    end
+
+    FE->>SC: Winner claims reward
+```
+
 The sudoku contract **reconstructs the proof's journal from the room's stored puzzle givens**, hashes it, and passes that digest to the verifier. This binds each proof to a specific puzzle — a proof for one room cannot be replayed in another, and `image_id` pins proofs to *our* guest program.
 
 ---

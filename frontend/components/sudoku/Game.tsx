@@ -33,6 +33,7 @@ export const SudokuGame = ({
   room_id = 0,
   initial_state = null,
   currentWinner = null,
+  alreadyClaimed = false,
   onVerifySuccess = () => {},
   onClaimSuccess = () => {},
   testMode = false,
@@ -40,6 +41,7 @@ export const SudokuGame = ({
   room_id?: number;
   initial_state?: [number, number][] | null;
   currentWinner?: string | null;
+  alreadyClaimed?: boolean;
   onVerifySuccess?: (txHash: string) => void;
   onClaimSuccess?: (txHash: string) => void;
   testMode?: boolean;
@@ -79,6 +81,16 @@ export const SudokuGame = ({
   useEffect(() => {
     if (address && currentWinner && currentWinner === address) setWinnerLocked(true);
   }, [currentWinner, address]);
+
+  // If I'm the winner and the chain already shows the reward claimed (e.g. after a
+  // page reload), re-open the success modal in its claimed state.
+  useEffect(() => {
+    if (address && currentWinner === address && alreadyClaimed) {
+      setProofSubmitted(true);
+      setClaimed(true);
+      setGameSolved(true);
+    }
+  }, [currentWinner, address, alreadyClaimed]);
 
   // In test mode, generate a local puzzle immediately (no chain needed).
   useEffect(() => {
