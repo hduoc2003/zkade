@@ -15,12 +15,20 @@ pub struct Env {
     pub NETWORK_PASSPHRASE: String,
     /// Service fee added to each room, in token base units (stroops for XLM).
     pub SERVICE_FEE: u128,
+    /// Remote RISC Zero prover endpoint (full `/generate-proof` URL). When set,
+    /// proofs are generated there instead of locally. `None` → local/Bonsai.
+    pub PROVER_URL: Option<String>,
 }
 
 static ENV: OnceCell<Env> = OnceCell::const_new();
 
 fn read_env(key: &'static str) -> String {
     std::env::var(key).unwrap_or_else(|_| panic!("{} must be set", key))
+}
+
+/// Optional env var: `None` when unset or empty/whitespace.
+fn read_env_opt(key: &'static str) -> Option<String> {
+    std::env::var(key).ok().filter(|s| !s.trim().is_empty())
 }
 
 pub async fn config_env() {
@@ -38,6 +46,7 @@ pub async fn config_env() {
             SERVICE_FEE: read_env("SERVICE_FEE")
                 .parse()
                 .expect("SERVICE_FEE must be a number"),
+            PROVER_URL: read_env_opt("PROVER_URL"),
         }
     })
     .await;
