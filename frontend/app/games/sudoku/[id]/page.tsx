@@ -170,6 +170,13 @@ export default function SudokuGamePage({ params }: { params: Promise<{ id: strin
                                 />
                             ) : (gameStarted || gameIsStarted) && (!roomInfo?.initial_state || roomInfo.initial_state.length === 0) ? (
                                 <PuzzleLoadingScreen />
+                            ) : (gameStarted || gameIsStarted) && !isPlayer ? (
+                                <ViewOnlyScreen
+                                    players={players.length}
+                                    maxPlayers={maxPlayers}
+                                    prizePool={prizePool}
+                                    display={DISPLAY}
+                                />
                             ) : gameStarted || gameIsStarted ? (
                                 <SudokuGame
                                     room_id={parseInt(room_id)}
@@ -258,6 +265,30 @@ function PuzzleLoadingScreen() {
                     />
                 ))}
             </div>
+        </div>
+    );
+}
+
+function ViewOnlyScreen({ players, maxPlayers, prizePool, display }: {
+    players: number; maxPlayers: number; prizePool: number; display: string;
+}) {
+    return (
+        <div className="flex flex-col items-center gap-6 py-16">
+            <div
+                className="border border-secondary px-6 py-3 font-mono text-sm text-secondary tracking-widest"
+                style={{ boxShadow: '0 0 12px #FF006E40' }}
+            >
+                ▶ GAME IN PROGRESS ◀
+            </div>
+            <div className="flex flex-col items-center gap-2">
+                <span className="font-data text-xl text-primary text-neon-cyan">{players}/{maxPlayers} PLAYERS</span>
+                <span className="font-mono text-xs text-muted tracking-wider">POOL <span className="text-accent">{prizePool} {display}</span></span>
+            </div>
+            <p className="font-mono text-xs text-muted text-center max-w-sm leading-relaxed">
+                You are viewing this room. Each player solves privately — solutions never leave their
+                browser until a ZK proof is submitted, so there is no live board to watch. Only players
+                in this room can solve and claim.
+            </p>
         </div>
     );
 }

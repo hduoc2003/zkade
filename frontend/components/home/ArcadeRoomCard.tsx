@@ -16,7 +16,7 @@ export function ArcadeRoomCard(room: RoomInfo) {
 
     const actionLabel =
         status === RoomStatus.Pending ? 'JOIN ROOM' :
-        status === RoomStatus.Playing ? 'SPECTATE' :
+        status === RoomStatus.Playing ? 'VIEW' :
         'VIEW';
     const actionVariant =
         status === RoomStatus.Pending ? 'primary' :
