@@ -3,52 +3,55 @@
 import { ArcadeRoomCard } from "@/components/home/ArcadeRoomCard";
 import { NeonButton } from "@/components/cyber/NeonButton";
 import { NeonPanel } from "@/components/cyber/NeonPanel";
-import { GameInfo } from "@/types/game";
+import { DECIMALS, GameAPI, roomStatus } from "@/api/gameAPI";
 import { RoomInfo, RoomStatus } from "@/types/room";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import useSWR from "swr";
 
-// Mock — swap for on-chain query later
-const GAME_OWNER = process.env.NEXT_PUBLIC_GAME_OWNER ?? '';
+const UNIT = 10 ** DECIMALS;
 
-const GAME_INFO = {
-  sudoku:      { splashImg: "/sudoku-preview.png",      name: "Sudoku",      slug: "sudoku"      },
-  sokoban:     { splashImg: "/sokoban-preview.jpg",     name: "Sokoban",     slug: "sokoban"     },
-  minesweeper: { splashImg: "/minesweeper-preview.jpg", name: "Minesweeper", slug: "minesweeper" },
-};
-
-// Mock game list
-const allGames: Pick<GameInfo, 'playingRooms' | 'icon' | 'name'>[] = [
-  { icon: "https://brainium.com/wp-content/uploads/2021/11/sudoku-Mobile-hero-asset@2x.png", playingRooms: 42, name: "Sudoku"      },
-  { icon: "/sokoban-preview.jpg",                                                              playingRooms: 13, name: "Sokoban"     },
-  { icon: "/minesweeper-preview.jpg",                                                          playingRooms: 8,  name: "Minesweeper" },
-];
-
-// Mock room list — mix of games and statuses
-const allRooms: RoomInfo[] = [
-  { idByGame: 2,  creator: GAME_OWNER, status: RoomStatus.Playing,  playerCount: 2, maxPlayers: 2, gameInfo: GAME_INFO.sudoku,      depositPrice: 50  },
-  { idByGame: 3,  creator: GAME_OWNER, status: RoomStatus.Pending,  playerCount: 1, maxPlayers: 4, gameInfo: GAME_INFO.sudoku,      depositPrice: 10  },
-  { idByGame: 11, creator: GAME_OWNER, status: RoomStatus.Playing,  playerCount: 2, maxPlayers: 2, gameInfo: GAME_INFO.sokoban,     depositPrice: 200 },
-  { idByGame: 4,  creator: GAME_OWNER, status: RoomStatus.Pending,  playerCount: 3, maxPlayers: 4, gameInfo: GAME_INFO.sudoku,      depositPrice: 25  },
-  { idByGame: 21, creator: GAME_OWNER, status: RoomStatus.Pending,  playerCount: 1, maxPlayers: 2, gameInfo: GAME_INFO.minesweeper, depositPrice: 15  },
-  { idByGame: 5,  creator: GAME_OWNER, status: RoomStatus.Finished, playerCount: 2, maxPlayers: 2, gameInfo: GAME_INFO.sudoku,      depositPrice: 100 },
-  { idByGame: 12, creator: GAME_OWNER, status: RoomStatus.Finished, playerCount: 2, maxPlayers: 2, gameInfo: GAME_INFO.sokoban,     depositPrice: 500 },
-  { idByGame: 22, creator: GAME_OWNER, status: RoomStatus.Playing,  playerCount: 2, maxPlayers: 4, gameInfo: GAME_INFO.minesweeper, depositPrice: 30  },
-];
-
-// Mock status counts
-const statusCounts = { Playing: 63, Pending: 52, Finished: 41 };
-
-// Mock network stats
-const networkStats = [
-  { label: 'TOTAL PRIZE POOL',    value: '12,840 XLM', color: 'text-warning' },
-  { label: 'PLAYERS ONLINE',      value: '108',         color: 'text-accent' },
-  { label: 'GAMES TODAY',         value: '319',         color: 'text-primary' },
-  { label: 'ZK PROOFS VERIFIED',  value: '87',          color: 'text-secondary' },
-];
+// Sudoku is the only deployed game; its splash/slug live here.
+const SUDOKU_GAME = { splashImg: "/sudoku-preview.png", name: "Sudoku", slug: "sudoku" };
 
 export default function Home() {
   const router = useRouter();
+  const { data: rawRooms } = useSWR("rooms", () => GameAPI.listRooms(), { refreshInterval: 5000 });
+
+  const rooms: RoomInfo[] = (rawRooms ?? []).map((r) => ({
+    idByGame: r.room_id,
+    creator: r.creator,
+    status: roomStatus(r),
+    playerCount: r.players.length,
+    maxPlayers: r.max_players,
+    gameInfo: SUDOKU_GAME,
+    depositPrice: Number(r.deposit_price) / UNIT,
+  }));
+
+  // Newest rooms first.
+  const sortedRooms = [...rooms].sort((a, b) => b.idByGame - a.idByGame);
+
+  const statusCounts = {
+    [RoomStatus.Playing]: rooms.filter((r) => r.status === RoomStatus.Playing).length,
+    [RoomStatus.Pending]: rooms.filter((r) => r.status === RoomStatus.Pending).length,
+    [RoomStatus.Finished]: rooms.filter((r) => r.status === RoomStatus.Finished).length,
+  };
+
+  const allGames = [
+    { icon: "/sudoku-preview.png", playingRooms: statusCounts[RoomStatus.Playing], name: "Sudoku" },
+  ];
+
+  const totalPrizePool = rooms.reduce((sum, r) => sum + r.depositPrice * r.playerCount, 0);
+  const activeRooms = statusCounts[RoomStatus.Pending] + statusCounts[RoomStatus.Playing];
+  const distinctPlayers = new Set((rawRooms ?? []).flatMap((r) => r.players)).size;
+  const gamesSolved = (rawRooms ?? []).filter((r) => r.solved).length;
+
+  const networkStats = [
+    { label: 'TOTAL PRIZE POOL', value: `${totalPrizePool.toLocaleString()} XLM`, color: 'text-warning' },
+    { label: 'ACTIVE ROOMS',     value: `${activeRooms}`,                         color: 'text-accent' },
+    { label: 'TOTAL PLAYERS',    value: `${distinctPlayers}`,                     color: 'text-primary' },
+    { label: 'GAMES SOLVED',     value: `${gamesSolved}`,                         color: 'text-secondary' },
+  ];
 
   return (
     <div className="flex flex-col gap-6 pt-6 max-w-[1920px] mx-auto">
@@ -122,16 +125,21 @@ export default function Home() {
           <div className="flex items-end justify-between border-b border-border pb-2">
             <div>
               <h1 className="font-mono text-base text-primary text-neon-cyan tracking-widest">SELECT A ROOM</h1>
-              <span className="font-mono text-sm text-muted">{allRooms.length} rooms available</span>
+              <span className="font-mono text-sm text-muted">{sortedRooms.length} rooms available</span>
             </div>
             <span className="font-mono text-xs text-muted tracking-wider">SORT: RECENT ▼</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3 mb-8">
-            {allRooms.map((room) => (
+            {sortedRooms.map((room) => (
               <ArcadeRoomCard key={`${room.idByGame}-${room.gameInfo.name}`} {...room} />
             ))}
           </div>
+          {sortedRooms.length === 0 && (
+            <div className="font-mono text-sm text-muted py-8 text-center">
+              No rooms yet — create the first one.
+            </div>
+          )}
         </div>
       </section>
     </div>

@@ -1,4 +1,5 @@
 import { httpService } from './httpService';
+import { RoomStatus } from '@/types/room';
 import {
     readContract,
     writeContract,
@@ -25,6 +26,15 @@ export interface RoomState {
     winner: string | null;
     solved: boolean;
     claimed: boolean;
+}
+
+export type RoomWithId = RoomState & { room_id: number };
+
+/** Derive the lifecycle status of a room from its on-chain state. */
+export function roomStatus(r: RoomState): RoomStatus {
+    if (r.solved || r.winner) return RoomStatus.Finished;
+    if (r.initial_state) return RoomStatus.Playing;
+    return RoomStatus.Pending;
 }
 
 interface RawGivenCell {
@@ -79,6 +89,25 @@ export class GameAPI {
     }
 
     // ---- on-chain reads ----
+
+    /** Total number of rooms ever created (the room id counter). */
+    static async roomCount(): Promise<number> {
+        const count = (await readContract('room_count', [])) as bigint | number;
+        return Number(count);
+    }
+
+    /**
+     * Fetch every room (ids 1..=room_count) in parallel. Rooms whose persistent
+     * entry has expired or otherwise fail to load are skipped, not faked.
+     */
+    static async listRooms(): Promise<RoomWithId[]> {
+        const count = await this.roomCount();
+        const ids = Array.from({ length: count }, (_, i) => i + 1);
+        const settled = await Promise.allSettled(
+            ids.map((id) => this.queryRoom(id).then((r) => ({ ...r, room_id: id }))),
+        );
+        return settled.flatMap((s) => (s.status === 'fulfilled' ? [s.value] : []));
+    }
 
     static async queryRoom(room_id: number): Promise<RoomState> {
         const raw = (await readContract('query_room', [scU64(room_id)])) as RawRoom;

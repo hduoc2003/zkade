@@ -1,11 +1,10 @@
 'use client';
 
-import { GameAPI } from "@/api/gameAPI";
+import { DECIMALS, GameAPI, roomStatus } from "@/api/gameAPI";
 import { NeonButton } from "@/components/cyber/NeonButton";
 import { NeonPanel } from "@/components/cyber/NeonPanel";
-import { GameInfo } from "@/types/game";
+import { RoomStatus } from "@/types/room";
 import { displayDenom, shortAddress } from "@/utils/chain";
-import { randInt } from "@/utils/math";
 import { useStellarWallet } from "@/components/provider/StellarProvider";
 import { isUndefined } from "lodash";
 import Image from "next/image";
@@ -17,25 +16,32 @@ import useSWR from "swr";
 const DENOM = process.env.NEXT_PUBLIC_DENOM ?? 'min';
 const DISPLAY = displayDenom(DENOM);
 const SUDOKU_CONTRACT = process.env.NEXT_PUBLIC_SUDOKU_CONTRACT ?? '';
+const UNIT = 10 ** DECIMALS;
 
-// Mock game list — swap for on-chain query later
-const allGames: Pick<GameInfo, 'name' | 'slug' | 'icon' | 'totalPrizePool' | 'largestPrizePool' | 'playingRooms' | 'contractAddress' | 'splashImg'>[] = [
+// Sudoku is the only deployed game.
+const allGames = [
     {
         name: "Sudoku",
         slug: "sudoku",
-        icon: "https://brainium.com/wp-content/uploads/2021/11/sudoku-Mobile-hero-asset@2x.png",
-        totalPrizePool: randInt(1000, 10000),
-        largestPrizePool: 600,
-        playingRooms: randInt(3, 10),
+        icon: "/sudoku-preview.png",
         contractAddress: SUDOKU_CONTRACT,
-        splashImg: "https://reactjsexample.com/content/images/2020/04/A-Sudoku-web-app-in-React.png",
+        splashImg: "/sudoku-preview.png",
     },
 ];
 
 export default function NewRoomPage() {
     const { data: serviceFee } = useSWR("service-fee", GameAPI.getServiceFee);
+    const { data: rawRooms } = useSWR("rooms", () => GameAPI.listRooms(), { refreshInterval: 5000 });
     const router = useRouter();
     const { address, signTransaction } = useStellarWallet();
+
+    // Real on-chain pool stats for the selected game (all rooms are Sudoku).
+    const pools = (rawRooms ?? []).map((r) => (Number(r.deposit_price) / UNIT) * r.players.length);
+    const gameStats = {
+        totalPrizePool: pools.reduce((a, b) => a + b, 0),
+        largestPrizePool: pools.length ? Math.max(...pools) : 0,
+        playingRooms: (rawRooms ?? []).filter((r) => roomStatus(r) === RoomStatus.Playing).length,
+    };
 
     const [depositPrice, setDepositPrice] = useState(0);
     const [maxPlayers, setMaxPlayers] = useState(1);
@@ -166,13 +172,13 @@ export default function NewRoomPage() {
                                 </span>
                             </StatRow>
                             <StatRow label="TOTAL POOL">
-                                <span className="text-warning">{game.totalPrizePool} {DISPLAY}</span>
+                                <span className="text-warning">{gameStats.totalPrizePool.toLocaleString()} {DISPLAY}</span>
                             </StatRow>
                             <StatRow label="LARGEST">
-                                <span className="text-warning">{game.largestPrizePool} {DISPLAY}</span>
+                                <span className="text-warning">{gameStats.largestPrizePool.toLocaleString()} {DISPLAY}</span>
                             </StatRow>
                             <StatRow label="ACTIVE">
-                                <span className="text-accent">{game.playingRooms} ROOMS</span>
+                                <span className="text-accent">{gameStats.playingRooms} ROOMS</span>
                             </StatRow>
                         </div>
                     </div>
