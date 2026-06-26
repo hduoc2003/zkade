@@ -80,7 +80,7 @@ export default function Home() {
           <h2 className="font-mono font-bold text-2xl text-primary text-neon-cyan tracking-widest">
             ZKADE
           </h2>
-          <p className="font-mono text-sm text-muted leading-relaxed max-w-xl">
+          <p className="font-sans text-sm text-muted leading-relaxed max-w-xl">
             Your move is your proof. No trust required —{' '}
             <span className="text-accent">mathematics enforces the rules</span>,
             the chain holds the stakes, and the winner takes all.

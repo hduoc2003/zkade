@@ -2,13 +2,15 @@ import React from 'react';
 
 type NeonPanelAccent = 'cyan' | 'magenta' | 'green' | 'purple' | 'gold' | 'none';
 
-const accentStyles: Record<NeonPanelAccent, { border: string; shadow: string; title: string }> = {
-    cyan:    { border: 'border-primary',   shadow: 'shadow-neon-cyan',    title: 'text-primary' },
-    magenta: { border: 'border-secondary', shadow: 'shadow-neon-magenta', title: 'text-secondary' },
-    green:   { border: 'border-accent',    shadow: 'shadow-neon-green',   title: 'text-accent' },
-    purple:  { border: 'border-info',      shadow: 'shadow-neon-purple',  title: 'text-info' },
-    gold:    { border: 'border-warning',   shadow: 'shadow-neon-gold',    title: 'text-warning' },
-    none:    { border: 'border-border',    shadow: '',                    title: 'text-muted' },
+// Colored borders carry the neon identity; the ambient box-shadow glow is left
+// to the hero alone, so panels stay quiet and the page has a single focal point.
+const accentStyles: Record<NeonPanelAccent, { border: string; title: string }> = {
+    cyan:    { border: 'border-primary',   title: 'text-primary' },
+    magenta: { border: 'border-secondary', title: 'text-secondary' },
+    green:   { border: 'border-accent',    title: 'text-accent' },
+    purple:  { border: 'border-info',      title: 'text-info' },
+    gold:    { border: 'border-warning',   title: 'text-warning' },
+    none:    { border: 'border-border',    title: 'text-muted' },
 };
 
 type NeonPanelProps = {
@@ -21,7 +23,7 @@ type NeonPanelProps = {
 export function NeonPanel({ accent = 'none', title, children, className = '' }: NeonPanelProps) {
     const s = accentStyles[accent];
     return (
-        <div className={`border ${s.border} ${s.shadow} bg-bg-panel flex flex-col ${className}`}>
+        <div className={`border ${s.border} bg-bg-panel flex flex-col ${className}`}>
             {title && (
                 <div className={`border-b ${s.border} px-3 py-1.5 text-xs tracking-widest uppercase ${s.title} font-mono`}>
                     ▸ {title}

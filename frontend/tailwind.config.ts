@@ -24,6 +24,7 @@ const config: Config = {
         error:        THEME.ERROR,
       },
       fontFamily: {
+        sans: ['var(--font-sans)', 'sans-serif'],
         mono: ['var(--font-mono)', 'monospace'],
         'data': ['var(--font-data)', 'monospace'],
         // legacy aliases so old pixel/vt323 classes still compile without error

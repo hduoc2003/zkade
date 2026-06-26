@@ -58,10 +58,11 @@ export default function SudokuGamePage({ params }: { params: Promise<{ id: strin
             {/* Page header */}
             <div className="flex items-center gap-3 border-b border-border pb-3">
                 <Image
-                    src="https://brainium.com/wp-content/uploads/2021/11/sudoku-Mobile-hero-asset@2x.png"
+                    src="/sudoku-icon.svg"
                     alt=""
                     width={28}
                     height={28}
+                    unoptimized
                 />
                 <h1 className="font-mono text-xl text-primary text-neon-cyan tracking-widest">
                     SUDOKU <span className="text-accent">#{room_id}</span>
@@ -284,7 +285,7 @@ function ViewOnlyScreen({ players, maxPlayers, prizePool, display }: {
                 <span className="font-data text-xl text-primary text-neon-cyan">{players}/{maxPlayers} PLAYERS</span>
                 <span className="font-mono text-xs text-muted tracking-wider">POOL <span className="text-accent">{prizePool} {display}</span></span>
             </div>
-            <p className="font-mono text-xs text-muted text-center max-w-sm leading-relaxed">
+            <p className="font-sans text-xs text-muted text-center max-w-sm leading-relaxed">
                 You are viewing this room. Each player solves privately — solutions never leave their
                 browser until a ZK proof is submitted, so there is no live board to watch. Only players
                 in this room can solve and claim.
@@ -478,7 +479,7 @@ function ZkExplainer() {
                         <div className="font-mono text-xs tracking-widest" style={{ color: step.color }}>
                             {step.title}
                         </div>
-                        <p className="font-mono text-xs text-muted leading-relaxed">
+                        <p className="font-sans text-xs text-muted leading-relaxed">
                             {step.desc}
                         </p>
                     </div>
