@@ -7,7 +7,7 @@ export default function TestPage() {
     return (
         <main className="flex flex-col gap-6 pt-6 max-w-[1920px] mx-auto">
             <div className="font-mono text-xs text-muted border border-border px-3 py-1.5 w-fit">
-                TEST MODE — UI only, no wallet or server
+                TEST MODE - UI only, no wallet or server
             </div>
             <SudokuProvider>
                 <SudokuGame testMode />

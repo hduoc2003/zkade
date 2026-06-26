@@ -81,7 +81,7 @@ export default function Home() {
             ZKADE
           </h2>
           <p className="font-sans text-sm text-muted leading-relaxed max-w-xl">
-            Your move is your proof. No trust required —{' '}
+            Your move is your proof. No trust required -{' '}
             <span className="text-accent">mathematics enforces the rules</span>,
             the chain holds the stakes, and the winner takes all.
           </p>
@@ -168,7 +168,7 @@ export default function Home() {
           </div>
           {sortedRooms.length === 0 && (
             <div className="font-mono text-sm text-muted py-8 text-center">
-              No rooms yet — create the first one.
+              No rooms yet - create the first one.
             </div>
           )}
         </div>

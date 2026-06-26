@@ -21,7 +21,7 @@ const dataFont = Share_Tech_Mono({
   variable: '--font-data',
 });
 
-// Body/prose face — pairs with IBM Plex Mono (same superfamily) so reading text
+// Body/prose face - pairs with IBM Plex Mono (same superfamily) so reading text
 // is clean sans while labels, data and addresses stay mono.
 const sansFont = IBM_Plex_Sans({
   subsets: ['latin'],

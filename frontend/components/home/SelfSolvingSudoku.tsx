@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 // A fixed valid solution + a scattered "givens" mask. The non-given cells fill
-// in one-by-one on a loop, so the hero shows a puzzle solving itself — the one
+// in one-by-one on a loop, so the hero shows a puzzle solving itself - the one
 // thing this product is actually about.
 const SOLUTION = [
   1, 2, 3, 4, 5, 6, 7, 8, 9,

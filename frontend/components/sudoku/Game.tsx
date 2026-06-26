@@ -239,7 +239,7 @@ export const SudokuGame = ({
     if (!address) { toast.error('Please connect your wallet first'); return; }
     const solution = extractAnswer();
     try {
-      // Step 1: lock winner on chain via server (fast) — beats slower public submitters
+      // Step 1: lock winner on chain via server (fast) - beats slower public submitters
       if (!winnerLocked) {
         setLockingWinner(true);
         await GameAPI.lockWinner(room_id, address, solution);
@@ -252,7 +252,7 @@ export const SudokuGame = ({
       const proof = await GameAPI.generateProof(initial_state ?? [], solution);
       setGeneratingProof(false);
 
-      // Step 3: submit the Groth16 seal — sender must equal the locked winner.
+      // Step 3: submit the Groth16 seal - sender must equal the locked winner.
       // The contract reconstructs the journal from the room's givens, hashes it,
       // and cross-contract-verifies via the RISC Zero verifier.
       setSubmittingProof(true);
@@ -295,7 +295,7 @@ export const SudokuGame = ({
 
   function busyLabel() {
     if (lockingWinner)   return 'LOCKING WINNER ON-CHAIN…';
-    if (generatingProof) return 'LOCKED IN — GENERATING ZK PROOF…';
+    if (generatingProof) return 'LOCKED IN - GENERATING ZK PROOF…';
     if (submittingProof) return 'SUBMITTING PROOF TO CHAIN…';
     if (claiming)        return 'CLAIMING REWARD…';
     return '';

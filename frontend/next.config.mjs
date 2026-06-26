@@ -17,7 +17,7 @@ const nextConfig = {
         config.externals.push('pino-pretty', 'lokijs', 'encoding', 'bs58', '@react-native-async-storage/async-storage');
         // Force all imports of `react`/`react-dom` to resolve to the user-installed version,
         // not Next.js's bundled canary (which lacks useEffectEvent).
-        // Redirect all React imports — including Next.js's internal compiled copy —
+        // Redirect all React imports - including Next.js's internal compiled copy -
         // to the single user-installed React 19, preventing two-instance hook crashes.
         const r = path.resolve.bind(path, __dirname, 'node_modules');
         config.resolve.alias = {

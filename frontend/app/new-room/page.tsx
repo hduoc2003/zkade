@@ -64,7 +64,7 @@ export default function NewRoomPage() {
             </div>
 
             <div className="flex flex-col lg:flex-row gap-4">
-                {/* Left — settings + summary */}
+                {/* Left - settings + summary */}
                 <div className="flex flex-col gap-4 flex-1">
                     <NeonPanel title="ROOM SETTINGS" accent="cyan">
                         <div className="flex flex-col gap-4">
@@ -137,7 +137,7 @@ export default function NewRoomPage() {
                     </NeonPanel>
                 </div>
 
-                {/* Right — game selector */}
+                {/* Right - game selector */}
                 <NeonPanel title="SELECT GAME" accent="green" className="flex-1 flex flex-col gap-4">
                     <div className="flex flex-wrap gap-3">
                         {allGames.map((g, i) => (

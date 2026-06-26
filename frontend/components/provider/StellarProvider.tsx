@@ -17,7 +17,7 @@ const PASSPHRASE = process.env.NEXT_PUBLIC_NETWORK_PASSPHRASE ?? Networks.TESTNE
 const STORAGE_KEY = 'zkade:wallet';
 // Dev/test only: when set, sign locally with this testnet secret instead of
 // opening Freighter. Lets the full UI flow be driven without a browser wallet.
-// Leave unset in any real deployment — Freighter is the default path.
+// Leave unset in any real deployment - Freighter is the default path.
 const DEV_SECRET = process.env.NEXT_PUBLIC_DEV_WALLET_SECRET;
 
 interface StellarWalletContext {
