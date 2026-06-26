@@ -3,8 +3,8 @@
 import { SudokuProvider } from "@/components/sudoku/context/SudokuContext";
 import { SudokuGame } from "@/components/sudoku/Game";
 import { useStellarWallet } from "@/components/provider/StellarProvider";
-import { displayDenom, shortAddress } from "@/utils/chain";
-import { use, useState } from "react";
+import { displayDenom, explorerTx, shortAddress } from "@/utils/chain";
+import { use, useEffect, useState } from "react";
 import useSWR from "swr";
 import { toast } from "react-toastify";
 import { GameAPI } from "@/api/gameAPI";
@@ -28,13 +28,17 @@ export default function SudokuGamePage({ params }: { params: Promise<{ id: strin
         () => GameAPI.queryRoom(parseInt(room_id)),
         { refreshInterval: 1000, refreshWhenHidden: true, refreshWhenOffline: true }
     );
-    const [txHashes, setTxHashes] = useState<{ description: string; txHash: string }[]>(() => {
-        if (typeof window === 'undefined') return [];
-        return [
+    const [txHashes, setTxHashes] = useState<{ description: string; txHash: string }[]>([]);
+
+    // Load persisted create/join tx hashes after mount. Reading localStorage during
+    // render would make the server and client HTML differ (hydration mismatch).
+    useEffect(() => {
+        const persisted = [
             { description: "Create Room", txHash: localStorage.getItem("createRoomTxHash") || "" },
             { description: "Join Room", txHash: localStorage.getItem("joinRoomHash") || "" },
         ].filter(t => t.txHash);
-    });
+        if (persisted.length) setTxHashes(prev => [...persisted, ...prev]);
+    }, []);
     const [gameStarted, setGameStarted] = useState(false);
     const [waitForStartingGame, setWaitForStartingGame] = useState(false);
 
@@ -84,7 +88,7 @@ export default function SudokuGamePage({ params }: { params: Promise<{ id: strin
                             <InfoRow label="DEPOSIT">{depositPrice} {DISPLAY}</InfoRow>
                             <InfoRow label="POOL">{prizePool} {DISPLAY}</InfoRow>
                             <InfoRow label="PLAYERS">{players.length}/{roomInfo?.max_players ?? '?'}P</InfoRow>
-                            {roomInfo?.winner && <InfoRow label="WINNER"><span className="text-accent cursor-pointer" onClick={() => navigator.clipboard.writeText(roomInfo.winner!)} title={`${roomInfo.winner} — click to copy`}>{shortAddress(roomInfo.winner)}</span></InfoRow>}
+                            {roomInfo?.winner && <InfoRow label="WINNER"><span className="text-accent cursor-pointer" onClick={() => navigator.clipboard.writeText(roomInfo.winner!)} title={`${roomInfo.winner} - click to copy`}>{shortAddress(roomInfo.winner)}</span></InfoRow>}
                         </div>
                         <button
                             onClick={() => {
@@ -129,20 +133,22 @@ export default function SudokuGamePage({ params }: { params: Promise<{ id: strin
                             txHashes.map(({ txHash, description }) => (
                                 <div key={txHash} className="flex justify-between py-0.5">
                                     <span className="font-mono text-xs text-muted">{description.toUpperCase()}</span>
-                                    <span
-                                        className="font-mono text-xs text-primary cursor-pointer hover:text-neon-cyan"
-                                        onClick={() => navigator.clipboard.writeText(txHash)}
-                                        title="Click to copy"
+                                    <a
+                                        href={explorerTx(txHash)}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="font-mono text-xs text-primary hover:text-neon-cyan flex items-center gap-1"
+                                        title="View on stellar.expert"
                                     >
-                                        {shortAddress(txHash, 4)}
-                                    </span>
+                                        {shortAddress(txHash, 4)} <span className="text-[10px]">↗</span>
+                                    </a>
                                 </div>
                             ))
                         )}
                     </NeonPanel>
                 </div>
 
-                {/* Right — game area */}
+                {/* Right - game area */}
                 <SudokuProvider>
                     <div className="flex flex-col gap-4 flex-1">
                         {/* Tabs */}
@@ -286,7 +292,7 @@ function ViewOnlyScreen({ players, maxPlayers, prizePool, display }: {
                 <span className="font-mono text-xs text-muted tracking-wider">POOL <span className="text-accent">{prizePool} {display}</span></span>
             </div>
             <p className="font-sans text-xs text-muted text-center max-w-sm leading-relaxed">
-                You are viewing this room. Each player solves privately — solutions never leave their
+                You are viewing this room. Each player solves privately - solutions never leave their
                 browser until a ZK proof is submitted, so there is no live board to watch. Only players
                 in this room can solve and claim.
             </p>
@@ -349,7 +355,7 @@ function WaitingScreen({ players, maxPlayers, isFull, isOwner, isPlayer, deposit
             {isOwner ? (
                 <div className="flex flex-col items-center gap-3">
                     <p className="font-mono text-xs text-muted tracking-widest text-center">
-                        {isFull ? '▶ ROOM FULL — READY TO START' : '… WAITING FOR MORE PLAYERS'}
+                        {isFull ? '▶ ROOM FULL - READY TO START' : '… WAITING FOR MORE PLAYERS'}
                     </p>
                     <NeonButton
                         variant="primary"
@@ -368,7 +374,7 @@ function WaitingScreen({ players, maxPlayers, isFull, isOwner, isPlayer, deposit
             ) : isPlayer ? (
                 <div className="flex flex-col items-center gap-3">
                     <p className="font-mono text-xs text-muted tracking-widest text-center">
-                        {isFull ? '▶ ROOM FULL — WAITING FOR OWNER TO START' : '… WAITING FOR MORE PLAYERS'}
+                        {isFull ? '▶ ROOM FULL - WAITING FOR OWNER TO START' : '… WAITING FOR MORE PLAYERS'}
                     </p>
                     <div className="flex gap-1">
                         {[0, 1, 2].map(i => (
@@ -435,7 +441,7 @@ const ZK_STEPS = [
         icon: '⊞',
         color: '#00FFFF',
         title: 'SOLVE PUZZLE',
-        desc: 'Fill in the 9×9 Sudoku grid. Your solution stays local — never sent to any server.',
+        desc: 'Fill in the 9×9 Sudoku grid. Your solution stays local - never sent to any server.',
     },
     {
         icon: '⬡',
