@@ -1,6 +1,7 @@
 'use client';
 
 import { ArcadeRoomCard } from "@/components/home/ArcadeRoomCard";
+import { SelfSolvingSudoku } from "@/components/home/SelfSolvingSudoku";
 import { NeonButton } from "@/components/cyber/NeonButton";
 import { NeonPanel } from "@/components/cyber/NeonPanel";
 import { DECIMALS, GameAPI, roomStatus } from "@/api/gameAPI";
@@ -74,20 +75,21 @@ export default function Home() {
   return (
     <div className="flex flex-col gap-6 pt-6 max-w-[1920px] mx-auto">
       {/* Hero banner */}
-      <div className="border border-border bg-bg-panel p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-        <div className="flex flex-col gap-1 flex-1">
-          <h2 className="font-mono font-bold text-lg text-primary text-neon-cyan tracking-widest">
+      <div className="border border-border bg-bg-panel p-6 flex flex-col md:flex-row items-start md:items-center gap-6">
+        <div className="flex flex-col gap-4 flex-1">
+          <h2 className="font-mono font-bold text-2xl text-primary text-neon-cyan tracking-widest">
             ZKADE
           </h2>
-          <p className="font-mono text-xs text-muted leading-relaxed max-w-xl">
+          <p className="font-mono text-sm text-muted leading-relaxed max-w-xl">
             Your move is your proof. No trust required —{' '}
             <span className="text-accent">mathematics enforces the rules</span>,
             the chain holds the stakes, and the winner takes all.
           </p>
+          <NeonButton variant="primary" size="md" className="w-fit" onClick={() => router.push('/new-room')}>
+            + NEW ROOM
+          </NeonButton>
         </div>
-        <NeonButton variant="primary" size="md" onClick={() => router.push('/new-room')}>
-          + NEW ROOM
-        </NeonButton>
+        <SelfSolvingSudoku />
       </div>
 
       {/* Network stats bar */}
