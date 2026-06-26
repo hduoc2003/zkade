@@ -118,6 +118,47 @@ fn private_zk_flow() {
     assert_eq!(balance(&f.env, &f.token, &f.client.address), 0);
 }
 
+/// Full private flow against a *real* puzzle (non-empty givens). Unlike
+/// `private_zk_flow` (empty givens -> a constant journal), this exercises
+/// `reconstruct_journal` over actual givens, so the puzzle-bound journal digest
+/// passed to the verifier is non-trivial - the anti-replay binding is actually
+/// run, not just built.
+#[test]
+fn private_flow_with_real_givens() {
+    let f = setup(2);
+    let players = &f.players;
+    let room_id = f
+        .client
+        .create_new_room(&DEPOSIT, &FEE, &2, &players.get(0).unwrap());
+    for p in players.iter() {
+        f.client.join_room(&p, &room_id);
+    }
+
+    let givens = vec![
+        &f.env,
+        GivenCell { coord: 0, value: 1 },
+        GivenCell { coord: 1, value: 2 },
+        GivenCell { coord: 2, value: 3 },
+    ];
+    f.client.start_game(&room_id, &givens);
+    f.client.lock_winner(&room_id, &players.get(0).unwrap());
+
+    let seal = Bytes::from_array(&f.env, &[1u8, 2, 3, 4]);
+    f.client
+        .submit_solution(&players.get(0).unwrap(), &room_id, &seal);
+    f.client.claim_reward(&players.get(0).unwrap(), &room_id);
+
+    // The room stored the real puzzle (not the empty default), the proof path
+    // ran against it, and the winner swept the pot.
+    let room = f.client.query_room(&room_id);
+    assert_eq!(room.initial_state, Some(givens));
+    assert!(room.solved);
+    assert_eq!(
+        balance(&f.env, &f.token, &players.get(0).unwrap()),
+        1000 - DEPOSIT - FEE + DEPOSIT * 2
+    );
+}
+
 #[test]
 fn public_flow() {
     let f = setup(3);

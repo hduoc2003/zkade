@@ -441,7 +441,7 @@ const ZK_STEPS = [
         icon: '⊞',
         color: '#00FFFF',
         title: 'SOLVE PUZZLE',
-        desc: 'Fill in the 9×9 Sudoku grid. Your solution stays local - never sent to any server.',
+        desc: 'Fill in the 9×9 Sudoku grid. Your answer is never published on-chain or shown to opponents - only a proof of it is.',
     },
     {
         icon: '⬡',

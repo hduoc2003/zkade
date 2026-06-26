@@ -2,7 +2,7 @@
 
 > Prove you won. Without revealing how.
 
-ZKADE is a zero-knowledge gaming arcade on **Stellar**. Players stake into a shared prize pool, race to solve a game, and the winner claims the entire pot - **and no server can fake a win, steal the pot, or copy their answer.**
+ZKADE is a zero-knowledge gaming arcade on **Stellar**. Players stake into a shared prize pool, race to solve a game, and the winner claims the entire pot - **and no server can fake a win or steal the pot, and no rival can copy the winning answer.**
 
 Built for the [Stellar Hacks: Real-World ZK](https://dorahacks.io/hackathon/stellar-hacks-zk) hackathon.
 
@@ -12,7 +12,7 @@ Built for the [Stellar Hacks: Real-World ZK](https://dorahacks.io/hackathon/stel
 
 **The problem.** On-chain competitive games face a brutal tradeoff. Submit your solution publicly and every opponent watching the mempool can copy it and front-run your claim - your skill is worthless the instant you prove it. The alternative is trusting a centralized server to validate results off-chain - which throws away the entire point of being on-chain: now you trust an operator who can collude, stall, or lie.
 
-**The solution.** The winner generates a **RISC Zero Groth16 proof** - cryptographic evidence that *"I know a valid solution"* without revealing what it is. A **Soroban** contract verifies that proof **on-chain** using Stellar's native **BN254** pairing functions (Protocol 25 "X-Ray"), and releases the pot the moment it checks out. No server can forge the result. No answer to leak. No judge to bribe.
+**The solution.** The winner generates a **RISC Zero Groth16 proof** - cryptographic evidence that *"I know a valid solution"* without revealing what it is. A **Soroban** contract verifies that proof **on-chain** using Stellar's native **BN254** pairing functions (Protocol 25 "X-Ray"), and releases the pot the moment it checks out. No server can forge the result. The winning answer never goes on-chain. No judge to bribe.
 
 The architecture is **game-agnostic**: any game whose winning condition can be expressed as a Rust program can be plugged in as a new RISC Zero guest. Sudoku is the first.
 
@@ -23,7 +23,7 @@ The architecture is **game-agnostic**: any game whose winning condition can be e
 ```
 Browser ──Stellar Wallets Kit / Freighter──▶ sign Soroban invoke ──▶ Stellar testnet
    │
-   ├─ solve puzzle (locally; never leaves the browser)
+   ├─ solve puzzle locally (answer goes only to the prover, never on-chain)
    │
    └─ POST /api/v1/games/generate-proof ──▶ server (risc0-zkvm, Bonsai/local)
             └─ Groth16 receipt { seal, journal, image_id }
@@ -140,7 +140,7 @@ cd frontend && pnpm dev
 
 1. **Create & join** - the owner (server) creates a room; players join by depositing the entry fee (XLM) into the contract.
 2. **Start** - the owner publishes the puzzle givens on-chain.
-3. **Solve** - players solve locally. The solution never leaves the browser.
+3. **Solve** - players solve locally; the solution is sent only to the prover to build the proof, never published on-chain or shown to opponents.
 4. **Prove** - the first solver locks themselves as winner, then the server generates a RISC Zero Groth16 proof of their solution.
 5. **Verify** - the player submits the proof; the contract cross-contract-verifies it on-chain (native BN254 pairing).
 6. **Claim** - the verified winner sweeps the prize pool.
@@ -151,10 +151,10 @@ A public (reveal-the-answer) path is also available as a fallback.
 
 ## Honest limitations
 
-What is **trustless today** is the part that holds your money: fund custody, proof verification, and reward release all happen on-chain. No server can fake a win, steal the pot, or copy a ZK submitter's answer. That said, this is a hackathon build and it is not yet fully decentralized:
+What is **trustless today** is the part that holds your money: fund custody, proof verification, and reward release all happen on-chain. No server can fake a win or steal the pot, and the winning answer is never published on-chain. That said, this is a hackathon build and it is not yet fully decentralized:
 
 - **A trusted coordinator still runs the round.** A server (the contract owner) creates rooms, generates the puzzle, and locks the winner. It *can't* steal funds or forge a win - the contract and the proof prevent that - but it *could* censor, stall, or pre-solve the puzzle it hands out. So "no trusted server" holds for *verification and custody*, not yet for *coordination*; permissionless rooms and on-chain puzzle generation are the natural next steps.
-- **Proof generation is off-chain and not instant.** A Groth16 proof takes ~1–2 minutes and needs real compute (Bonsai, or a local/remote prover with x86_64 + Docker) - it cannot run in a browser. The prover holds no keys and can't rig the game (every proof is verified on-chain, and anyone can run their own), but it is an off-chain dependency.
+- **Proof generation is off-chain, and the prover sees your solution.** A Groth16 proof takes ~1–2 minutes and needs real compute (Bonsai, or a local/remote prover with x86_64 + Docker) - it cannot run in a browser. Because the prover *builds* the proof, it necessarily receives your plaintext solution, so it is trusted for **privacy**. It still can't forge a win or move funds (every proof is verified on-chain, and anyone can run their own prover), and the answer is never published on-chain or shown to opponents - but the answer is not hidden from the prover itself.
 - **Testnet, unaudited.** Runs on Stellar testnet with test XLM. The contract has unit tests (including journal byte-equality against the real guest) but no formal audit, and proofs are pinned to a specific `image_id` and a matching `risc0-zkvm` 3.0.x toolchain.
 
 ---
