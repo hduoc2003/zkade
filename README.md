@@ -62,7 +62,7 @@ sequenceDiagram
     FE->>SC: Winner claims reward
 ```
 
-The sudoku contract **reconstructs the proof's journal from the room's stored puzzle givens**, hashes it, and passes that digest to the verifier. This binds each proof to a specific puzzle - a proof for one room cannot be replayed in another, and `image_id` pins proofs to *our* guest program.
+The sudoku contract **reconstructs the proof's journal from the room's stored puzzle givens**, hashes it, and passes that digest to the verifier. This binds each proof to its **puzzle givens** - a proof is accepted only against a room holding those exact givens (so it can't be replayed against a different puzzle), and `image_id` pins proofs to *our* guest program.
 
 ---
 
@@ -153,7 +153,7 @@ A public (reveal-the-answer) path is also available as a fallback.
 
 What is **trustless today** is the part that holds your money: fund custody, proof verification, and reward release all happen on-chain. No server can fake a win or steal the pot, and the winning answer is never published on-chain. That said, this is a hackathon build and it is not yet fully decentralized:
 
-- **A trusted coordinator still runs the round.** A server (the contract owner) creates rooms, generates the puzzle, and locks the winner. It *can't* steal funds or forge a win - the contract and the proof prevent that - but it *could* censor, stall, or pre-solve the puzzle it hands out. So "no trusted server" holds for *verification and custody*, not yet for *coordination*; permissionless rooms and on-chain puzzle generation are the natural next steps.
+- **A trusted coordinator selects the winner today.** A server (the contract owner) creates rooms, generates the puzzle, and - critically - **locks the winner** (`lock_winner`) after validating their solution off-chain, *before* any proof is submitted. So the on-chain proof guarantees **solution validity and trustless custody/payout** (no server can fake a win or move funds), but it does **not** yet decide *who* won - the coordinator's ordering does. The server can also censor, stall, or pre-solve the puzzle it hands out. Making winner-selection trustless - permissionless rooms plus a *first-valid-proof-wins* race that removes `lock_winner` - is the named next step.
 - **Proof generation is off-chain, and the prover sees your solution.** A Groth16 proof takes ~1–2 minutes and needs real compute (Bonsai, or a local/remote prover with x86_64 + Docker) - it cannot run in a browser. Because the prover *builds* the proof, it necessarily receives your plaintext solution, so it is trusted for **privacy**. It still can't forge a win or move funds (every proof is verified on-chain, and anyone can run their own prover), and the answer is never published on-chain or shown to opponents - but the answer is not hidden from the prover itself.
 - **Testnet, unaudited.** Runs on Stellar testnet with test XLM. The contract has unit tests (including journal byte-equality against the real guest) but no formal audit, and proofs are pinned to a specific `image_id` and a matching `risc0-zkvm` 3.0.x toolchain.
 
