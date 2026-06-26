@@ -22,7 +22,7 @@ const dataFont = Share_Tech_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ZKADE",
+  title: "ZKADE - Prove you won. Without revealing how.",
   description: "ZK battle arcade on Stellar",
 };
 

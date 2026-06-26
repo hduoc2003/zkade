@@ -38,7 +38,7 @@ export default function Home() {
   };
 
   const allGames = [
-    { icon: "/sudoku-preview.png", playingRooms: statusCounts[RoomStatus.Playing], name: "Sudoku" },
+    { icon: "/sudoku-icon.svg", playingRooms: statusCounts[RoomStatus.Playing], name: "Sudoku" },
   ];
 
   const totalPrizePool = rooms.reduce((sum, r) => sum + r.depositPrice * r.playerCount, 0);
@@ -88,7 +88,7 @@ export default function Home() {
           <NeonPanel title="GAMES" accent="cyan">
             {allGames.map((game) => (
               <div key={game.name} className="flex items-center gap-2 text-muted cursor-pointer hover:text-text transition-colors py-1">
-                <Image src={game.icon} alt="" width={16} height={16} className="shrink-0" />
+                <Image src={game.icon} alt="" width={20} height={20} unoptimized className="shrink-0 w-5 h-5" />
                 <span className="flex-1 font-mono text-xs tracking-wider">{game.name.toUpperCase()}</span>
                 <span className="font-data text-base text-primary">{game.playingRooms}</span>
               </div>
