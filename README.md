@@ -2,7 +2,7 @@
 
 > Prove you won. Without revealing how.
 
-ZKADE is a zero-knowledge gaming arcade on **Stellar**. Players stake into a shared prize pool, race to solve a game, and the winner claims the entire pot — **with no trusted server, and no way for anyone to copy their answer.**
+ZKADE is a zero-knowledge gaming arcade on **Stellar**. Players stake into a shared prize pool, race to solve a game, and the winner claims the entire pot - **and no server can fake a win, steal the pot, or copy their answer.**
 
 Built for the [Stellar Hacks: Real-World ZK](https://dorahacks.io/hackathon/stellar-hacks-zk) hackathon.
 
@@ -10,9 +10,9 @@ Built for the [Stellar Hacks: Real-World ZK](https://dorahacks.io/hackathon/stel
 
 ## What it does
 
-**The problem.** On-chain competitive games face a brutal tradeoff. Submit your solution publicly and every opponent watching the mempool can copy it and front-run your claim — your skill is worthless the instant you prove it. The alternative is trusting a centralized server to validate results off-chain — which throws away the entire point of being on-chain: now you trust an operator who can collude, stall, or lie.
+**The problem.** On-chain competitive games face a brutal tradeoff. Submit your solution publicly and every opponent watching the mempool can copy it and front-run your claim - your skill is worthless the instant you prove it. The alternative is trusting a centralized server to validate results off-chain - which throws away the entire point of being on-chain: now you trust an operator who can collude, stall, or lie.
 
-**The solution.** The winner generates a **RISC Zero Groth16 proof** — cryptographic evidence that *"I know a valid solution"* without revealing what it is. A **Soroban** contract verifies that proof **on-chain** using Stellar's native **BN254** pairing functions (Protocol 25 "X-Ray"), and releases the pot the moment it checks out. No server to trust. No answer to leak. No judge to bribe.
+**The solution.** The winner generates a **RISC Zero Groth16 proof** - cryptographic evidence that *"I know a valid solution"* without revealing what it is. A **Soroban** contract verifies that proof **on-chain** using Stellar's native **BN254** pairing functions (Protocol 25 "X-Ray"), and releases the pot the moment it checks out. No server can forge the result. No answer to leak. No judge to bribe.
 
 The architecture is **game-agnostic**: any game whose winning condition can be expressed as a Rust program can be plugged in as a new RISC Zero guest. Sudoku is the first.
 
@@ -48,9 +48,9 @@ sequenceDiagram
     BE->>SC: Only owner can start the game (publish givens)
 
     alt Winner is the fastest player to solve the game
-        Note over FE,SC: Public path — reveal the solution
+        Note over FE,SC: Public path - reveal the solution
         FE->>SC: Winner publishes his solution
-    else ZK path — hide the solution
+    else ZK path - hide the solution
         FE->>BE: Winner hides his solution
         BE->>ZK: Solution = private input, initial state = public input
         Note over ZK: Prove initial state + solution = valid final state
@@ -62,7 +62,7 @@ sequenceDiagram
     FE->>SC: Winner claims reward
 ```
 
-The sudoku contract **reconstructs the proof's journal from the room's stored puzzle givens**, hashes it, and passes that digest to the verifier. This binds each proof to a specific puzzle — a proof for one room cannot be replayed in another, and `image_id` pins proofs to *our* guest program.
+The sudoku contract **reconstructs the proof's journal from the room's stored puzzle givens**, hashes it, and passes that digest to the verifier. This binds each proof to a specific puzzle - a proof for one room cannot be replayed in another, and `image_id` pins proofs to *our* guest program.
 
 ---
 
@@ -96,7 +96,7 @@ See `soroban/deployment.json`.
 - Rust + `cargo`, with the `wasm32v1-none` target (`rustup target add wasm32v1-none`)
 - [Stellar CLI](https://github.com/stellar/stellar-cli) (`stellar`)
 - RISC Zero toolchain: `curl -L https://risczero.com/install | bash && rzup install`
-- Docker (for local Groth16 proving — x86_64)
+- Docker (for local Groth16 proving - x86_64)
 - [Freighter](https://www.freighter.app/) browser wallet (testnet enabled)
 
 ---
@@ -119,17 +119,17 @@ cd soroban && ./deploy.sh        # funds a key via Friendbot, deploys verifier +
 
 ### 3. Configure environment
 
-**`server/.env`** (copy from `.env.example`) — set `GAME_CONTRACT` to the deployed sudoku id and `GAME_OWNER` to your funded `stellar` identity. Optionally set `BONSAI_API_KEY` / `BONSAI_API_URL` for hosted proving (else proves locally).
+**`server/.env`** (copy from `.env.example`) - set `GAME_CONTRACT` to the deployed sudoku id and `GAME_OWNER` to your funded `stellar` identity. Optionally set `BONSAI_API_KEY` / `BONSAI_API_URL` for hosted proving (else proves locally).
 
-**`frontend/.env.local`** (copy from `.env.example`) — set `NEXT_PUBLIC_SUDOKU_CONTRACT` and `NEXT_PUBLIC_GAME_OWNER`.
+**`frontend/.env.local`** (copy from `.env.example`) - set `NEXT_PUBLIC_SUDOKU_CONTRACT` and `NEXT_PUBLIC_GAME_OWNER`.
 
 ### 4. Run
 
 ```bash
-# Terminal 1 — backend
+# Terminal 1 - backend
 cd server && cargo run
 
-# Terminal 2 — frontend
+# Terminal 2 - frontend
 cd frontend && pnpm dev
 # open http://localhost:3000
 ```
@@ -138,14 +138,24 @@ cd frontend && pnpm dev
 
 ## How the round works
 
-1. **Create & join** — the owner (server) creates a room; players join by depositing the entry fee (XLM) into the contract.
-2. **Start** — the owner publishes the puzzle givens on-chain.
-3. **Solve** — players solve locally. The solution never leaves the browser.
-4. **Prove** — the first solver locks themselves as winner, then the server generates a RISC Zero Groth16 proof of their solution.
-5. **Verify** — the player submits the proof; the contract cross-contract-verifies it on-chain (native BN254 pairing).
-6. **Claim** — the verified winner sweeps the prize pool.
+1. **Create & join** - the owner (server) creates a room; players join by depositing the entry fee (XLM) into the contract.
+2. **Start** - the owner publishes the puzzle givens on-chain.
+3. **Solve** - players solve locally. The solution never leaves the browser.
+4. **Prove** - the first solver locks themselves as winner, then the server generates a RISC Zero Groth16 proof of their solution.
+5. **Verify** - the player submits the proof; the contract cross-contract-verifies it on-chain (native BN254 pairing).
+6. **Claim** - the verified winner sweeps the prize pool.
 
 A public (reveal-the-answer) path is also available as a fallback.
+
+---
+
+## Honest limitations
+
+What is **trustless today** is the part that holds your money: fund custody, proof verification, and reward release all happen on-chain. No server can fake a win, steal the pot, or copy a ZK submitter's answer. That said, this is a hackathon build and it is not yet fully decentralized:
+
+- **A trusted coordinator still runs the round.** A server (the contract owner) creates rooms, generates the puzzle, and locks the winner. It *can't* steal funds or forge a win - the contract and the proof prevent that - but it *could* censor, stall, or pre-solve the puzzle it hands out. So "no trusted server" holds for *verification and custody*, not yet for *coordination*; permissionless rooms and on-chain puzzle generation are the natural next steps.
+- **Proof generation is off-chain and not instant.** A Groth16 proof takes ~1–2 minutes and needs real compute (Bonsai, or a local/remote prover with x86_64 + Docker) - it cannot run in a browser. The prover holds no keys and can't rig the game (every proof is verified on-chain, and anyone can run their own), but it is an off-chain dependency.
+- **Testnet, unaudited.** Runs on Stellar testnet with test XLM. The contract has unit tests (including journal byte-equality against the real guest) but no formal audit, and proofs are pinned to a specific `image_id` and a matching `risc0-zkvm` 3.0.x toolchain.
 
 ---
 
