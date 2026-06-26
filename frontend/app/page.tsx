@@ -7,9 +7,18 @@ import { DECIMALS, GameAPI, roomStatus } from "@/api/gameAPI";
 import { RoomInfo, RoomStatus } from "@/types/room";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import useSWR from "swr";
 
 const UNIT = 10 ** DECIMALS;
+
+const SORT_OPTIONS = {
+  recent: "RECENT",
+  oldest: "OLDEST",
+  pool: "PRIZE POOL",
+  players: "PLAYERS",
+} as const;
+type SortKey = keyof typeof SORT_OPTIONS;
 
 // Sudoku is the only deployed game; its splash/slug live here.
 const SUDOKU_GAME = { splashImg: "/sudoku-preview.png", name: "Sudoku", slug: "sudoku" };
@@ -28,8 +37,17 @@ export default function Home() {
     depositPrice: Number(r.deposit_price) / UNIT,
   }));
 
-  // Newest rooms first.
-  const sortedRooms = [...rooms].sort((a, b) => b.idByGame - a.idByGame);
+  const [sortBy, setSortBy] = useState<SortKey>("recent");
+  const pool = (r: RoomInfo) => r.depositPrice * r.playerCount;
+  const sortedRooms = [...rooms].sort((a, b) => {
+    switch (sortBy) {
+      case "oldest": return a.idByGame - b.idByGame;
+      case "pool": return pool(b) - pool(a);
+      case "players": return b.playerCount - a.playerCount;
+      case "recent":
+      default: return b.idByGame - a.idByGame;
+    }
+  });
 
   const statusCounts = {
     [RoomStatus.Playing]: rooms.filter((r) => r.status === RoomStatus.Playing).length,
@@ -127,7 +145,18 @@ export default function Home() {
               <h1 className="font-mono text-base text-primary text-neon-cyan tracking-widest">SELECT A ROOM</h1>
               <span className="font-mono text-sm text-muted">{sortedRooms.length} rooms available</span>
             </div>
-            <span className="font-mono text-xs text-muted tracking-wider">SORT: RECENT ▼</span>
+            <label className="flex items-center gap-2">
+              <span className="font-mono text-xs text-muted tracking-wider">SORT:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as SortKey)}
+                className="bg-bg border border-border font-mono text-xs text-text tracking-wider px-2 py-1 focus:outline-none focus:border-primary cursor-pointer"
+              >
+                {(Object.keys(SORT_OPTIONS) as SortKey[]).map((k) => (
+                  <option key={k} value={k} className="bg-bg-panel">{SORT_OPTIONS[k]}</option>
+                ))}
+              </select>
+            </label>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3 mb-8">
