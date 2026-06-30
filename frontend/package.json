@@ -11,6 +11,7 @@
   "dependencies": {
     "@creit.tech/stellar-wallets-kit": "^2.3.0",
     "@stellar/stellar-sdk": "^16.0.1",
+    "axios": "1.13.6",
     "gh-pages": "^3.2.3",
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
