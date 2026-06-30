@@ -11,6 +11,7 @@ import { toast } from 'react-toastify';
 import { GameAPI } from '@/api/gameAPI';
 import { getUniqueSudoku } from './solver/UniqueSudoku';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { NeonButton } from '@/components/cyber/NeonButton';
 import { NeonPanel } from '@/components/cyber/NeonPanel';
 
@@ -348,15 +349,13 @@ export const SudokuGame = ({
               ▶ PUZZLE CLEARED ◀
             </div>
 
-            <div
-              className="border border-primary w-full flex flex-col items-center justify-center gap-2 py-8"
-              style={{ boxShadow: '0 0 12px #00FFFF60' }}
-            >
-              <span className="text-5xl" style={{ filter: 'drop-shadow(0 0 10px #FFD700)' }}>🏆</span>
-              <span className="font-data text-2xl tracking-[0.3em] text-accent" style={{ textShadow: '0 0 12px #00FF41' }}>
-                WINNER
-              </span>
-            </div>
+            <Image
+              src="/congratulations.jpg"
+              alt="Congratulations"
+              width={360}
+              height={160}
+              className="border border-primary w-full object-cover max-h-40"
+            />
 
             {claimed ? (
               <div className="flex flex-col items-center gap-4 w-full">
