@@ -32,6 +32,16 @@ const sansFont = IBM_Plex_Sans({
 export const metadata: Metadata = {
   title: "ZKADE - Prove you won. Without revealing how.",
   description: "ZK battle arcade on Stellar",
+  icons: {
+    icon: [
+      { url: "/favicon/favicon.ico", sizes: "any" },
+      { url: "/favicon/favicon-16.png", type: "image/png", sizes: "16x16" },
+      { url: "/favicon/favicon-32.png", type: "image/png", sizes: "32x32" },
+      { url: "/favicon/favicon-192.png", type: "image/png", sizes: "192x192" },
+      { url: "/favicon/favicon-512.png", type: "image/png", sizes: "512x512" },
+    ],
+    apple: "/favicon/favicon-180.png",
+  },
 };
 
 export default function RootLayout({
